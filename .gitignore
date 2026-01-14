@@ -1,0 +1,13 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+.env
+
+# Banco de Dados e Docker
+postgres_data/
+
+# Relatórios e Logs
+backend/relatorios_xlsx/
+*.log
+*.png
