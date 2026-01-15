@@ -1,0 +1,92 @@
+.view-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 35px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
+  width: 100%; 
+}
+
+.table-container {
+  margin-top: 30px;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Mágica: força as larguras definidas abaixo */
+}
+
+th:nth-child(1), td:nth-child(1) { width: 100px; } /* Código */
+th:nth-child(2), td:nth-child(2) { width: 100px; }  /* Nome do Gerente */
+th:nth-child(3), td:nth-child(3) { width: auto; } /* Área */
+th:nth-child(4), td:nth-child(4) { width: 180px; text-align: center; } /* Ações */
+
+th {
+  background: #F1F5F9;
+  padding: 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 100px;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 14px;
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+/* Efeito de destaque na linha ao passar o mouse */
+tr:hover td {
+  background-color: #F8FAFC;
+}
+
+/* Estilo dos botões de ação na mesma linha */
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 3fr));
+  gap: 20px;
+  margin-bottom: 35px;
+  align-items: flex-end;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 13px; font-weight: 600; color: #64748B; }
+
+input {
+  padding: 12px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.btn-save {
+  background: var(--primary);
+  color: white;
+  padding: 12px 25px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Estilo das Ações na Tabela */
+.actions-cell { text-align: right; display: flex; gap: 8px; justify-content: flex-end; }
+.btn-edit { color: var(--primary); border: 1px solid var(--primary); background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+.btn-delete { color: #dc3545; border: 1px solid #dc3545; background: transparent; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+
+.btn-edit:hover { background: var(--primary); color: white; }
+.btn-delete:hover { background: #dc3545; color: white; }

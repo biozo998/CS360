@@ -3,6 +3,14 @@ venv/
 __pycache__/
 *.py[cod]
 .env
+backend/venv/
+backend/__pycache__/
+backend/.env
+backend/erro_extracao.png
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
 
 # Banco de Dados e Docker
 postgres_data/
@@ -11,3 +19,6 @@ postgres_data/
 backend/relatorios_xlsx/
 *.log
 *.png
+
+# Sistema
+.DS_Store

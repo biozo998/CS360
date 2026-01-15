@@ -3,44 +3,86 @@ from flask_cors import CORS
 import database
 import processor
 import scraper
-import os
+from sqlalchemy import text
 
 app = Flask(__name__)
-CORS(app) # Permite que o React acesse a API
+# O CORS(app) resolve o erro que você viu na imagem
+CORS(app) 
 
-@app.route('/api/status', methods=['GET'])
-def status():
-    return jsonify({"status": "Online", "projeto": "CS360"})
+# Garante que as tabelas (inclusive as novas de cadastro) sejam criadas ao iniciar
+database.inicializar_banco()
 
-# ROTA PARA O BOTÃO "EXTRAIR AGORA"
-@app.route('/api/extrair/projetos', methods=['POST'])
-def extrair_projetos():
-    try:
-        database.inicializar_banco()
-        caminho = scraper.extrair_relatorio("projetos")
-        if caminho:
-            df = processor.processar_projetos(caminho)
-            database.upsert_dados(df)
-            return jsonify({"status": "sucesso", "mensagem": "Relatório atualizado no banco!"})
-        return jsonify({"status": "erro", "mensagem": "Falha no download"}), 500
-    except Exception as e:
-        return jsonify({"status": "erro", "mensagem": str(e)}), 500
+@app.route('/api/cadastros/gerentes', methods=['GET', 'POST'])
+def gerenciar_gerentes():
+    if request.method == 'POST':
+        dados = request.json
+        query = text("""
+            INSERT INTO cad_gerentes (codigo, nome, area) 
+            VALUES (:codigo, :nome, :area)
+            ON CONFLICT (codigo) DO UPDATE SET nome = :nome, area = :area
+        """)
+        with database.engine.begin() as conn:
+            conn.execute(query, dados)
+        return jsonify({"status": "sucesso"})
+    
+    with database.engine.connect() as conn:
+        res = conn.execute(text("SELECT * FROM cad_gerentes ORDER BY codigo"))
+        return jsonify([dict(r._mapping) for r in res])
 
-# ROTA PARA O GRÁFICO: HORAS POR GERENTE
+@app.route('/api/cadastros/gerentes/<codigo>', methods=['DELETE'])
+def excluir_gerente(codigo):
+    query = text("DELETE FROM cad_gerentes WHERE codigo = :codigo")
+    with database.engine.begin() as conn:
+        conn.execute(query, {"codigo": codigo})
+    return jsonify({"status": "sucesso"})
+
 @app.route('/api/dash/horas-por-gerente', methods=['GET'])
 def horas_por_gerente():
-    from sqlalchemy import text
-    query = """
-        SELECT gerente_tarefa, SUM(trab_apontado) as total_horas
-        FROM lancamentos_projeto
-        WHERE ativo = TRUE AND gerente_tarefa IS NOT NULL
-        GROUP BY gerente_tarefa
-        ORDER BY total_horas DESC
-    """
+    # SQL MELHORADO: Faz um JOIN com a tabela de cadastro para pegar o NOME
+    query = text("""
+        SELECT 
+            COALESCE(g.nome, l.gerente_tarefa) as gerente, 
+            SUM(l.trab_apontado) as horas
+        FROM lancamentos_projeto l
+        LEFT JOIN cad_gerentes g ON l.gerente_tarefa = g.codigo
+        WHERE l.ativo = TRUE AND l.gerente_tarefa IS NOT NULL
+        GROUP BY 1
+        ORDER BY horas DESC
+    """)
     with database.engine.connect() as conn:
-        result = conn.execute(text(query))
+        result = conn.execute(query)
         data = [{"gerente": r[0], "horas": float(r[1])} for r in result]
     return jsonify(data)
+
+# No seu backend/app.py
+
+@app.route('/api/cadastros/atividades', methods=['GET', 'POST'])
+def gerenciar_atividades():
+    if request.method == 'POST':
+        dados = request.json
+        # Importante: O SQL deve bater com os nomes das colunas que criamos
+        query = text("""
+            INSERT INTO cad_atividades (codigo, tipo_hora, descricao, estrategia)
+            VALUES (:codigo, :tipo_hora, :descricao, :estrategia)
+            ON CONFLICT (codigo) DO UPDATE 
+            SET tipo_hora = :tipo_hora, descricao = :descricao, estrategia = :estrategia
+        """)
+        with database.engine.begin() as conn:
+            conn.execute(query, dados)
+        return jsonify({"status": "sucesso"})
+
+    # Para o GET (Listagem)
+    with database.engine.connect() as conn:
+        res = conn.execute(text("SELECT * FROM cad_atividades ORDER BY codigo"))
+        return jsonify([dict(r._mapping) for r in res])
+
+# Rota de exclusão para manter o padrão CRUD
+@app.route('/api/cadastros/atividades/<codigo>', methods=['DELETE'])
+def excluir_atividade(codigo):
+    query = text("DELETE FROM cad_atividades WHERE codigo = :codigo")
+    with database.engine.begin() as conn:
+        conn.execute(query, {"codigo": codigo})
+    return jsonify({"status": "sucesso"})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

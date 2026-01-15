@@ -1,0 +1,117 @@
+.view-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 35px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.table-container {
+  margin-top: 30px;
+  width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed; /* Força o alinhamento perfeito */
+}
+
+/* Definição de Larguras Específicas */
+th:nth-child(1), td:nth-child(1) { width: 80px; }  /* Código */
+th:nth-child(2), td:nth-child(2) { width: 100px; } /* Tipo */
+th:nth-child(3), td:nth-child(3) { width: 160px; } /* Estratégia */
+th:nth-child(4), td:nth-child(4) { width: auto; }  /* Descrição */
+th:nth-child(5), td:nth-child(5) { width: 180px; text-align: center; } /* Ações */
+
+th {
+  background: #F1F5F9;
+  padding: 16px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark-navy);
+  text-transform: uppercase;
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid #E2E8F0;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+tr:hover td { background-color: #F8FAFC; }
+
+/* Badges de Estratégia */
+.badge {
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  display: inline-block;
+}
+.badge-expandir { background: #DCFCE7; color: #166534; }
+.badge-fortalecer { background: #FEF9C3; color: #854d0e; }
+.badge-consolidar { background: #DBEAFE; color: #1e40af; }
+.badge-cs { background: #FEF9C3; color: 854d0e; }
+.badge-cliente { background: #DCFCE7; color: #166534; }
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+/* Atualize estas definições no seu CadAtividades.css */
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748B;
+    height: 16px; /* Altura fixa para os labels alinharem horizontalmente */
+}
+
+/* Força input e select a terem exatamente o mesmo comportamento visual */
+input, select {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #FFFFFF; /* Fundo branco fixo */
+    color: #1E293B; /* Cor do texto (Dark Slate) - RESOLVE O INVISÍVEL */
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input::placeholder {
+    color: #94A3B8;
+}
+
+input:focus, select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(10, 134, 163, 0.1);
+}
+
+select option {
+    color: #1E293B;
+    background-color: #FFFFFF;
+}
+
+select {
+    cursor: pointer;
+    appearance: none; /* Remove seta padrão em alguns navegadores se desejar customizar */
+    background-image: url("data:image/svg+xml,..."); /* Pode adicionar uma seta customizada aqui */
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}

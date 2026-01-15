@@ -1,0 +1,19 @@
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 25px;
+}
+
+.chart-card {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 25px;
+  border: 1px solid var(--border-color);
+  min-height: 400px;
+}
+
+.chart-header {
+  margin-bottom: 20px;
+  border-bottom: 1px solid #F1F5F9;
+  padding-bottom: 15px;
+}
