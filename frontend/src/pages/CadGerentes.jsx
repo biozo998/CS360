@@ -117,7 +117,7 @@ const CadGerentes = () => {
               <th>Código</th>
               <th style={{ width: '232px' }}>Nome do Gerente</th>
               <th>Área</th>
-              <th style={{ textAlign: 'right' }}>Ações</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -126,7 +126,7 @@ const CadGerentes = () => {
                 <td><strong>{g.codigo}</strong></td>
                 <td>{g.nome}</td>
                 <td>{g.area}</td>
-                <td style={{ textAlign: 'right' }}>
+                <td className="actions-cell">
                   <button className="btn-edit" onClick={() => prepararEdicao(g)}>Editar</button>
                   <button className="btn-delete" onClick={() => excluirGerente(g.codigo)}>Excluir</button>
                 </td>
