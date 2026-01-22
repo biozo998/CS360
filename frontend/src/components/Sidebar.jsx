@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChartLine, faUsers, faTasks } from '@fortawesome/free-solid-svg-icons';
+import { faChartLine, faUsers, faTasks, faTableList } from '@fortawesome/free-solid-svg-icons';
 
 const Sidebar = ({ telaAtiva, setTelaAtiva }) => {
   return (
@@ -17,6 +17,14 @@ const Sidebar = ({ telaAtiva, setTelaAtiva }) => {
           <span>Dashboard</span>
         </button>
 
+        <button 
+          className={`nav-item ${telaAtiva === 'conferencia' ? 'active' : ''}`}
+          onClick={() => setTelaAtiva('conferencia')}
+        >
+          <FontAwesomeIcon icon={faTableList} />
+          <span>Conferência</span>
+        </button>
+        
         <div className="nav-section-title">Cadastros</div>
 
         <button 

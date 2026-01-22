@@ -111,3 +111,16 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg-body); 
   text-align: center;
 }
 /* --- FIM ESTILOS SIDEBAR --- */
+
+/* Container que ocupa 100% da largura (para relatórios e grids) */
+.fluid-container {
+  width: 100%;
+  max-width: 100%; /* Remove a trava de 1400px */
+  margin: 0;
+}
+
+/* Garante que o conteúdo principal expanda */
+.main-content {
+  display: flex;
+  flex-direction: column;
+}

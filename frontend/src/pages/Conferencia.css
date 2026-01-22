@@ -1,0 +1,181 @@
+.header-conferencia {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-conferencia h2 { margin-bottom: 5px; color: var(--dark-navy); }
+.header-conferencia p { color: #64748B; font-size: 14px; margin: 0; }
+
+.btn-filter {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 1px solid #CBD5E1;
+  background: white;
+  color: #64748B;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-filter:hover { background: #F1F5F9; }
+
+.btn-filter.active {
+  background: #FEF2F2;
+  border-color: #EF4444;
+  color: #EF4444;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+}
+
+/* --- Tabela Otimizada --- */
+.table-wrapper {
+  max-height: calc(100vh - 200px); /* Altura dinâmica */
+  overflow-y: auto; /* Scroll vertical */
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+
+table {
+  width: 100%;
+  border-collapse: separate; /* Necessário para o sticky header */
+  border-spacing: 0;
+}
+
+/* Cabeçalho Fixo (Sticky) */
+thead th {
+  position: sticky;
+  top: 0;
+  background: #F8FAFC;
+  z-index: 2; /* Fica acima das linhas */
+  padding: 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--dark-navy);
+  text-transform: uppercase;
+  border-bottom: 2px solid #E2E8F0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #F1F5F9;
+  font-size: 13px;
+  color: var(--text-main);
+  vertical-align: middle;
+  background: white;
+}
+
+tr:hover td { background-color: #F8FAFC; }
+
+/* Estilos de Validação */
+.cell-error {
+  background-color: #FEF2F2 !important;
+  color: #B91C1C;
+  font-weight: 700;
+}
+
+.cell-ok {
+  color: #10B981; /* Verde Suave para indicar OK */
+}
+
+.tag-missing {
+  font-size: 10px;
+  background: #EF4444;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.footer-info {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #64748B;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+.table-wrapper {
+  max-height: calc(100vh - 180px); /* Aumentei um pouco a área visível */
+  overflow: auto; /* Scroll vertical E horizontal */
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  background: white;
+}
+
+table {
+  width: max-content; /* Permite que a tabela cresça além da tela se necessário */
+  min-width: 100%;
+  border-collapse: separate; 
+  border-spacing: 0;
+  table-layout: fixed; /* Fundamental para o redimensionamento funcionar */
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  background: #F8FAFC;
+  z-index: 10;
+  padding: 0; /* Remove padding padrão para usar o container relativo */
+  text-align: left;
+  font-size: 11px; /* Fonte um pouco menor para caber tanta coluna */
+  font-weight: 700;
+  color: var(--dark-navy);
+  text-transform: uppercase;
+  border-bottom: 2px solid #E2E8F0;
+  border-right: 1px solid #E2E8F0;
+  user-select: none; /* Evita selecionar texto ao arrastar */
+}
+
+/* O conteúdo dentro do TH */
+.th-content {
+  padding: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+/* A "Alça" de redimensionamento */
+.resizer {
+  display: inline-block;
+  background: transparent;
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  transform: translateX(50%);
+  z-index: 1;
+  cursor: col-resize; /* Cursor de setinhas laterais */
+  touch-action: none;
+}
+
+.resizer:hover, .resizing {
+  background: var(--primary); /* Fica azul quando passa o mouse */
+  width: 4px; 
+}
+
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  border-right: 1px solid #F1F5F9;
+  font-size: 12px;
+  color: var(--text-main);
+  white-space: nowrap; /* Evita quebra de linha para ficar compacto */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Adicione no final do Conferencia.css */
+.text-right {
+  text-align: right;
+  font-variant-numeric: tabular-nums; /* Faz os números ocuparem a mesma largura, alinhando vírgula com vírgula */
+}
