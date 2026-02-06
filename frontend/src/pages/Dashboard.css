@@ -1,26 +1,142 @@
-.dash-grid {
+/* ============================================= */
+/*          ESTILOS GERAIS DO DASHBOARD        */
+/* ============================================= */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #334155; /* Cool Gray 700 */
+}
+
+.dashboard-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 25px;
+  gap: 1.5rem;
+  grid-template-columns: repeat(3, 1fr);
 }
 
+/* ============================================= */
+/*              CARDS DE ESTATÍSTICA (KPIs)      */
+/* ============================================= */
+.stat-card {
+  background-color: white;
+  border-radius: 0.75rem; /* 12px */
+  border: 1px solid #E2E8F0; /* Cool Gray 200 */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.stat-card-title {
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  color: #64748B; /* Cool Gray 500 */
+}
+
+.stat-card-value {
+  font-size: 2.25rem; /* 36px */
+  font-weight: 700;
+  color: #1E293B; /* Cool Gray 800 */
+  line-height: 1.2;
+}
+
+.stat-card-icon {
+  font-size: 1.5rem; /* 24px */
+  border-radius: 9999px; /* Circulo */
+  color: white;
+  margin-left: 0.75rem; /* Espaço entre o título e o ícone */
+  align-self: center; /* Alinha o ícone verticalmente com o texto */
+}
+
+.icon-projetos { background-color: #3B82F6; } /* Blue 500 */
+.icon-atrasados { background-color: #EF4444; } /* Red 500 */
+.icon-em-dia { background-color: #22C55E; } /* Green 500 */
+
+
+/* ============================================= */
+/*              CARD DO GRÁFICO                  */
+/* ============================================= */
 .chart-card {
-  background: var(--white);
-  border-radius: 12px;
-  padding: 25px;
-  border: 1px solid var(--border-color);
-  min-height: 400px;
+  background-color: white;
+  border-radius: 0.75rem;
+  border: 1px solid #E2E8F0;
+  grid-column: 1 / -1; /* Ocupa todas as colunas */
+  padding: 1.5rem;
 }
 
-.chart-header {
-  margin-bottom: 20px;
-  border-bottom: 1px solid #F1F5F9;
-  padding-bottom: 15px;
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #F1F5F9; /* Cool Gray 100 */
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.chart-container-fixed {
+.chart-card-header h3 {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: #334155;
+}
+
+.chart-container {
   width: 100%;
-  height: 400px; /* Define uma altura fixa para o Recharts não se perder */
-  margin-top: 20px;
-  position: relative;
+  height: 400px;
+}
+
+/* ============================================= */
+/*           BOTÕES E ELEMENTOS DE AÇÃO          */
+/* ============================================= */
+.export-button {
+  background-color: transparent;
+  border: none;
+  color: #94A3B8; /* Cool Gray 400 */
+  cursor: pointer;
+  font-size: 1.25rem;
+  transition: color 0.2s ease-in-out;
+}
+
+.export-button:hover {
+  color: #334155; /* Cool Gray 700 */
+}
+
+.update-button {
+  background-color: #0F172A; /* Slate 900 */
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.update-button:disabled {
+  background-color: #475569; /* Slate 600 */
+  cursor: not-allowed;
+}
+
+.update-button:hover:not(:disabled) {
+  background-color: #1E293B; /* Slate 800 */
+}
+
+.status-message {
+  font-size: 0.875rem;
+  color: #64748B;
+  text-align: right;
+  margin-top: 0.5rem;
 }

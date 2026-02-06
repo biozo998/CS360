@@ -13,6 +13,115 @@ CORS(app)
 # Garante que as tabelas (inclusive as novas de cadastro) sejam criadas ao iniciar
 database.inicializar_banco()
 
+# --- NOVOS ENDPOINTS DO DASHBOARD ---
+
+@app.route('/api/dashboard/kpis', methods=['GET'])
+def get_dashboard_kpis():
+    """Retorna os principais KPIs para os cards do dashboard."""
+    with database.engine.connect() as conn:
+        # Contagem de projetos ativos (DISTINCT)
+        q_proj_ativos = text("SELECT COUNT(DISTINCT id_proj) FROM lancamentos_projeto WHERE ativo = TRUE")
+        projetos_ativos = conn.execute(q_proj_ativos).scalar()
+
+        # Contagem de projetos com data fim atrasada (DISTINCT)
+        q_proj_atrasados = text("SELECT COUNT(DISTINCT id_proj) FROM lancamentos_projeto WHERE ativo = TRUE AND dt_fim < CURRENT_DATE")
+        projetos_atrasados = conn.execute(q_proj_atrasados).scalar()
+
+        # Contagem de projetos com data fim em dia (DISTINCT)
+        q_proj_em_dia = text("SELECT COUNT(DISTINCT id_proj) FROM lancamentos_projeto WHERE ativo = TRUE AND dt_fim >= CURRENT_DATE")
+        projetos_em_dia = conn.execute(q_proj_em_dia).scalar()
+        
+        return jsonify({
+            "projetos_ativos": projetos_ativos,
+            "projetos_atrasados": projetos_atrasados,
+            "projetos_em_dia": projetos_em_dia
+        })
+
+@app.route('/api/dashboard/horas-por-area', methods=['GET'])
+def get_horas_por_area():
+    """Retorna a soma de horas apontadas agrupadas por área do gerente."""
+    query = text("""
+        SELECT 
+            COALESCE(g.area, 'Sem Área') as area, 
+            SUM(l.trab_apontado) as horas
+        FROM lancamentos_projeto l
+        LEFT JOIN cad_gerentes g ON l.gerente_tarefa = g.codigo
+        WHERE l.ativo = TRUE AND l.trab_apontado > 0
+        GROUP BY g.area
+        ORDER BY horas DESC
+    """)
+    with database.engine.connect() as conn:
+        result = conn.execute(query)
+        data = [{"area": r[0], "horas": float(r[1])} for r in result]
+    return jsonify(data)
+
+# --- ENDPOINTS DE EXPORTAÇÃO PARA EXCEL ---
+
+@app.route('/api/export/projetos', methods=['GET'])
+def export_projetos_ativos():
+    """Retorna a lista detalhada de projetos ativos distintos."""
+    query = text("""
+        SELECT DISTINCT id_proj, projeto, cliente, dt_inicio, dt_fim
+        FROM lancamentos_projeto
+        WHERE ativo = TRUE
+        ORDER BY projeto
+    """)
+    with database.engine.connect() as conn:
+        res = conn.execute(query)
+        return jsonify([dict(r._mapping) for r in res])
+
+@app.route('/api/export/projetos-por-status', methods=['GET'])
+def export_projetos_por_status():
+    """Retorna projetos filtrando por status: 'atrasado' ou 'em_dia'."""
+    status = request.args.get('status', 'atrasado').lower()
+    
+    if status == 'atrasado':
+        filter_cond = "dt_fim < CURRENT_DATE"
+    else:
+        filter_cond = "dt_fim >= CURRENT_DATE"
+
+    query = text(f"""
+        SELECT DISTINCT id_proj, projeto, cliente, dt_inicio, dt_fim
+        FROM lancamentos_projeto
+        WHERE ativo = TRUE AND {filter_cond}
+        ORDER BY dt_fim
+    """)
+    with database.engine.connect() as conn:
+        res = conn.execute(query)
+        return jsonify([dict(r._mapping) for r in res])
+
+@app.route('/api/export/horas-por-area-detalhado', methods=['GET'])
+def export_horas_por_area_detalhado():
+    """Retorna todos os lançamentos que compõem o gráfico de horas por área."""
+    query = text("""
+        SELECT 
+            g.area,
+            l.projeto,
+            l.tarefa,
+            l.trab_apontado,
+            g.nome as nome_gerente
+        FROM lancamentos_projeto l
+        LEFT JOIN cad_gerentes g ON l.gerente_tarefa = g.codigo
+        WHERE l.ativo = TRUE AND l.trab_apontado > 0
+        ORDER BY g.area, l.projeto
+    """)
+    with database.engine.connect() as conn:
+        res = conn.execute(query)
+        # Converte o resultado para um formato JSON amigável
+        data = [
+            {
+                "area": r.area,
+                "projeto": r.projeto,
+                "tarefa": r.tarefa,
+                "horas_apontadas": float(r.trab_apontado),
+                "gerente": r.nome_gerente
+            } for r in res
+        ]
+        return jsonify(data)
+
+
+# --- ENDPOINTS DE CADASTRO (CRUD) ---
+
 @app.route('/api/cadastros/gerentes', methods=['GET', 'POST'])
 def gerenciar_gerentes():
     if request.method == 'POST':
@@ -37,31 +146,10 @@ def excluir_gerente(codigo):
         conn.execute(query, {"codigo": codigo})
     return jsonify({"status": "sucesso"})
 
-@app.route('/api/dash/horas-por-gerente', methods=['GET'])
-def horas_por_gerente():
-    # SQL MELHORADO: Faz um JOIN com a tabela de cadastro para pegar o NOME
-    query = text("""
-        SELECT 
-            COALESCE(g.nome, l.gerente_tarefa) as gerente, 
-            SUM(l.trab_apontado) as horas
-        FROM lancamentos_projeto l
-        LEFT JOIN cad_gerentes g ON l.gerente_tarefa = g.codigo
-        WHERE l.ativo = TRUE AND l.gerente_tarefa IS NOT NULL
-        GROUP BY 1
-        ORDER BY horas DESC
-    """)
-    with database.engine.connect() as conn:
-        result = conn.execute(query)
-        data = [{"gerente": r[0], "horas": float(r[1])} for r in result]
-    return jsonify(data)
-
-# No seu backend/app.py
-
 @app.route('/api/cadastros/atividades', methods=['GET', 'POST'])
 def gerenciar_atividades():
     if request.method == 'POST':
         dados = request.json
-        # Importante: O SQL deve bater com os nomes das colunas que criamos
         query = text("""
             INSERT INTO cad_atividades (codigo, tipo_hora, descricao, estrategia)
             VALUES (:codigo, :tipo_hora, :descricao, :estrategia)
@@ -72,12 +160,10 @@ def gerenciar_atividades():
             conn.execute(query, dados)
         return jsonify({"status": "sucesso"})
 
-    # Para o GET (Listagem)
     with database.engine.connect() as conn:
         res = conn.execute(text("SELECT * FROM cad_atividades ORDER BY codigo"))
         return jsonify([dict(r._mapping) for r in res])
 
-# Rota de exclusão para manter o padrão CRUD
 @app.route('/api/cadastros/atividades/<codigo>', methods=['DELETE'])
 def excluir_atividade(codigo):
     query = text("DELETE FROM cad_atividades WHERE codigo = :codigo")
@@ -87,24 +173,23 @@ def excluir_atividade(codigo):
 
 @app.route('/api/projetos/conferencia', methods=['GET'])
 def listar_conferencia():
-    # Query completa com todas as colunas solicitadas
     query = text("""
         SELECT 
             gerente_tarefa, 
             cod_resultado,
-            gerente,    -- Solicitado: gerente
+            gerente,
             cliente,
-            id_proj,         -- Solicitado: id_proj
+            id_proj,
             projeto, 
             centro_resultado,
-            tp_proj,        -- Solicitado: TP_Proj (ajuste se for tp_proj no banco)
+            tp_proj,
             id_tarefa, 
             tarefa, 
             dt_inicio,
             dt_fim,
             trab_prev,
             trab_apontado,
-            sld_hrs        -- Solicitado: sld_hrs (ajuste se for sld_hrs no banco)
+            sld_hrs
         FROM lancamentos_projeto 
         WHERE ativo = TRUE
         ORDER BY 
@@ -116,10 +201,11 @@ def listar_conferencia():
         res = conn.execute(query)
         return jsonify([dict(r._mapping) for r in res])
 
+# --- ROTA DE ATUALIZAÇÃO MANUAL ---
+
 @app.route('/api/extrair/projetos', methods=['POST'])
 def rota_extrair_projetos():
     try:
-        # Chama a função que orquestra o scraper, processor e database
         main.iniciar_fluxo_projetos() 
         return jsonify({"status": "sucesso", "mensagem": "Base PSOffice atualizada com sucesso!"})
     except Exception as e:
