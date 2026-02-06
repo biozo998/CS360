@@ -17,3 +17,10 @@
   border-bottom: 1px solid #F1F5F9;
   padding-bottom: 15px;
 }
+
+.chart-container-fixed {
+  width: 100%;
+  height: 400px; /* Define uma altura fixa para o Recharts não se perder */
+  margin-top: 20px;
+  position: relative;
+}

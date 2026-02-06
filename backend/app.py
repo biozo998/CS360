@@ -4,6 +4,7 @@ import database
 import processor
 import scraper
 from sqlalchemy import text
+import main
 
 app = Flask(__name__)
 # O CORS(app) resolve o erro que você viu na imagem
@@ -83,6 +84,46 @@ def excluir_atividade(codigo):
     with database.engine.begin() as conn:
         conn.execute(query, {"codigo": codigo})
     return jsonify({"status": "sucesso"})
+
+@app.route('/api/projetos/conferencia', methods=['GET'])
+def listar_conferencia():
+    # Query completa com todas as colunas solicitadas
+    query = text("""
+        SELECT 
+            gerente_tarefa, 
+            cod_resultado,
+            gerente,    -- Solicitado: gerente
+            cliente,
+            id_proj,         -- Solicitado: id_proj
+            projeto, 
+            centro_resultado,
+            tp_proj,        -- Solicitado: TP_Proj (ajuste se for tp_proj no banco)
+            id_tarefa, 
+            tarefa, 
+            dt_inicio,
+            dt_fim,
+            trab_prev,
+            trab_apontado,
+            sld_hrs        -- Solicitado: sld_hrs (ajuste se for sld_hrs no banco)
+        FROM lancamentos_projeto 
+        WHERE ativo = TRUE
+        ORDER BY 
+            (gerente_tarefa IS NULL OR gerente_tarefa = '') DESC, 
+            (cod_resultado IS NULL OR cod_resultado = '') DESC,
+            dt_inicio DESC
+    """)
+    with database.engine.connect() as conn:
+        res = conn.execute(query)
+        return jsonify([dict(r._mapping) for r in res])
+
+@app.route('/api/extrair/projetos', methods=['POST'])
+def rota_extrair_projetos():
+    try:
+        # Chama a função que orquestra o scraper, processor e database
+        main.iniciar_fluxo_projetos() 
+        return jsonify({"status": "sucesso", "mensagem": "Base PSOffice atualizada com sucesso!"})
+    except Exception as e:
+        return jsonify({"status": "erro", "mensagem": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

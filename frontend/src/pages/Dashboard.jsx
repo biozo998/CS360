@@ -45,21 +45,21 @@ const Dashboard = () => {
         <h3>Carga de Horas por Gerente</h3>
         <p style={{color: '#666', fontSize: '14px', marginBottom: '20px'}}>Status: {mensagem}</p>
         
-        <div style={{ width: '100%', height: 350 }}>
-          <ResponsiveContainer>
-            <BarChart data={dados}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="gerente" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="horas" fill="#0A86A3" radius={[4, 4, 0, 0]}>
-                {dados.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === 0 ? '#30B199' : '#0A86A3'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+      <div className="chart-container-fixed">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={dados}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="gerente" />
+            <YAxis />
+            <Tooltip />
+            <Bar dataKey="horas" fill="#0A86A3" radius={[4, 4, 0, 0]}>
+              {dados.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={index === 0 ? '#30B199' : '#0A86A3'} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
       </div>
     </div>
   );

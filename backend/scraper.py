@@ -67,7 +67,18 @@ def extrair_relatorio(tipo_relatorio):
         driver.find_element(By.ID, "user_pass").send_keys(os.getenv("PSOFFICE_PASSWORD"))
         driver.find_element(By.ID, "button_processLogin").click()
         
+        print("[Scraper] Login enviado. Aguardando processamento da sessão...")
         # 2. Navegação Direta
+
+        try:
+            # Aqui esperamos o corpo da página inicial carregar ou a URL mudar
+            wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+            time.sleep(3) # Tempo técnico para o navegador estabilizar os cookies
+            print("[Scraper] Sessão validada com sucesso.")
+        except:
+            print("[Scraper] Aviso: Demora na resposta do servidor após login.")
+
+
         print(f"[Scraper] Login feito. Indo para a URL do relatório: {config['url']}")
         driver.get(config["url"])
         
