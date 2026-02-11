@@ -175,31 +175,45 @@ def excluir_atividade(codigo):
 def listar_conferencia():
     query = text("""
         SELECT 
-            gerente_tarefa, 
-            cod_resultado,
-            gerente,
-            cliente,
-            id_proj,
-            projeto, 
-            centro_resultado,
-            tp_proj,
-            id_tarefa, 
-            tarefa, 
-            dt_inicio,
-            dt_fim,
-            trab_prev,
-            trab_apontado,
-            sld_hrs
-        FROM lancamentos_projeto 
-        WHERE ativo = TRUE
+            -- Colunas enriquecidas com COALESCE e concatenação
+            COALESCE(l.gerente_tarefa || ' - ' || g.nome, l.gerente_tarefa) as gerente_tarefa,
+            COALESCE(l.cod_resultado || ' - ' || a.descricao, l.cod_resultado) as cod_resultado,
+            
+            l.gerente,
+            l.cliente,
+            l.id_proj,
+            l.projeto, 
+            l.centro_resultado,
+            l.tp_proj,
+            l.id_tarefa, 
+            l.tarefa, 
+            l.dt_inicio,
+            l.dt_fim,
+            l.trab_prev,
+            l.trab_apontado,
+            l.sld_hrs
+        FROM 
+            lancamentos_projeto l
+        LEFT JOIN 
+            cad_gerentes g ON l.gerente_tarefa = g.codigo
+        LEFT JOIN 
+            cad_atividades a ON l.cod_resultado = a.codigo
+        WHERE 
+            l.ativo = TRUE
         ORDER BY 
-            (gerente_tarefa IS NULL OR gerente_tarefa = '') DESC, 
-            (cod_resultado IS NULL OR cod_resultado = '') DESC,
-            dt_inicio DESC
+            (l.gerente_tarefa IS NULL OR l.gerente_tarefa = '') DESC, 
+            (l.cod_resultado IS NULL OR l.cod_resultado = '') DESC,
+            l.dt_inicio DESC
     """)
     with database.engine.connect() as conn:
         res = conn.execute(query)
-        return jsonify([dict(r._mapping) for r in res])
+        # É importante converter os tipos de dados que não são JSON-serializáveis (como Decimal)
+        data = [dict(r._mapping) for r in res]
+        for row in data:
+            for key, value in row.items():
+                if isinstance(value, (int, float)):
+                    row[key] = float(value)
+        return jsonify(data)
 
 # --- ROTA DE ATUALIZAÇÃO MANUAL ---
 

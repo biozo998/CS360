@@ -75,8 +75,20 @@ def upsert_dados(df):
                     :trab_prev, :trab_apontado, :sld_hrs, :gerente_tarefa, :cod_resultado, TRUE
                 )
                 ON CONFLICT (id_tarefa) DO UPDATE SET
+                    gerente = EXCLUDED.gerente,
+                    cliente = EXCLUDED.cliente,
+                    projeto = EXCLUDED.projeto,
+                    centro_resultado = EXCLUDED.centro_resultado,
+                    tp_proj = EXCLUDED.tp_proj,
+                    tarefa = EXCLUDED.tarefa,
+                    responsavel = EXCLUDED.responsavel,
+                    dt_inicio = EXCLUDED.dt_inicio,
+                    dt_fim = EXCLUDED.dt_fim,
+                    trab_prev = EXCLUDED.trab_prev,
                     trab_apontado = EXCLUDED.trab_apontado,
                     sld_hrs = EXCLUDED.sld_hrs,
+                    gerente_tarefa = EXCLUDED.gerente_tarefa,
+                    cod_resultado = EXCLUDED.cod_resultado,
                     ativo = TRUE,
                     ultima_atualizacao = CURRENT_TIMESTAMP;
             """)

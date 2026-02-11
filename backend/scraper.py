@@ -9,11 +9,28 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
-from config import RELATORIOS # Importa as receitas que criamos no config.py
+from config import RELATORIOS
 
 load_dotenv()
 
 PASTA_DOWNLOAD = os.path.join(os.path.dirname(__file__), "relatorios_xlsx")
+
+def limpar_pasta_relatorios():
+    """Limpa todos os arquivos da pasta de relatórios para garantir um estado inicial limpo."""
+    print(f"[Scraper] Limpando pasta de relatórios: {PASTA_DOWNLOAD}")
+    if os.path.exists(PASTA_DOWNLOAD):
+        for filename in os.listdir(PASTA_DOWNLOAD):
+            file_path = os.path.join(PASTA_DOWNLOAD, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(f'[Scraper] Falha ao deletar {file_path}. Razão: {e}')
+    else:
+        os.makedirs(PASTA_DOWNLOAD)
+    print("[Scraper] Pasta de relatórios limpa.")
 
 def configurar_driver():
     if not os.path.exists(PASTA_DOWNLOAD):
@@ -49,6 +66,9 @@ def verificar_e_recuperar_perfil(driver, wait, url_alvo):
             print(f"[Scraper] Erro ao tentar sair da tela de perfil: {e}")
 
 def extrair_relatorio(tipo_relatorio):
+    # Passo 0: Limpar a pasta antes de começar
+    limpar_pasta_relatorios()
+
     config = RELATORIOS.get(tipo_relatorio)
     if not config:
         print(f"[Scraper] Erro: Relatório {tipo_relatorio} não configurado.")
