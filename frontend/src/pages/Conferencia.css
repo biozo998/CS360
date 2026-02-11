@@ -71,7 +71,7 @@ thead th {
   position: sticky;
   top: 0;
   background: #F8FAFC;
-  z-index: 2; /* Fica acima das linhas */
+  z-index: 10; /* Aumentei o z-index para garantir que fique acima */
   padding: 16px;
   text-align: left;
   font-size: 12px;
@@ -86,6 +86,7 @@ thead th {
     top: 55px; /* Ajuste para ficar abaixo do header principal */
     padding: 8px;
     background: #F1F5F9;
+    z-index: 11; /* Acima do thead th */
 }
 
 .filter-row input {
@@ -211,6 +212,43 @@ td {
   white-space: nowrap; /* Evita quebra de linha para ficar compacto */
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Estilos para a funcionalidade de copiar */
+.projeto-cell-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Alinha o texto à esquerda e o ícone à direita */
+  gap: 5px; /* Espaçamento entre o texto e o ícone */
+  overflow: hidden; /* Garante que o ícone não "empurre" o texto */
+  padding-right: 25px; /* Espaço para o ícone */
+}
+
+.projeto-cell-content span {
+  flex-grow: 1; /* Permite que o texto ocupe o espaço disponível */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.copy-icon {
+  position: absolute; /* Posição absoluta dentro do .projeto-cell-content */
+  right: 5px; /* Posição à direita */
+  top: 50%; /* Centraliza verticalmente */
+  transform: translateY(-50%); /* Ajuste fino para centralizar */
+  opacity: 0;
+  cursor: pointer;
+  color: #94A3B8; /* Cor do ícone */
+  transition: opacity 0.2s ease-in-out;
+  flex-shrink: 0; /* Impede que o ícone encolha */
+  padding: 2px; /* Área clicável maior */
+  z-index: 5; /* Garante que o ícone esteja acima do texto */
+  background-color: white; /* Garante que o ícone seja visível sobre o texto */
+}
+
+.projeto-cell-content:hover .copy-icon {
+  opacity: 1;
 }
 
 /* Adicione no final do Conferencia.css */

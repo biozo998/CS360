@@ -2,7 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFilter, faCheck, faExclamationTriangle, faFileExcel } from '@fortawesome/free-solid-svg-icons';
+import { faFilter, faCheck, faExclamationTriangle, faFileExcel, faCopy } from '@fortawesome/free-solid-svg-icons'; // Importar faCopy
+import Swal from 'sweetalert2';
 import { formatarHoraDecimal, formatarDataBR } from '../utils/formatters';
 import './Conferencia.css';
 
@@ -69,6 +70,32 @@ const Conferencia = () => {
     });
   }, [dados, somenteErros, filters]);
 
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        icon: 'success',
+        title: 'Copiado!',
+      });
+    } catch (err) {
+      console.error('Erro ao copiar:', err);
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500,
+        timerProgressBar: true,
+        icon: 'error',
+        title: 'Falha ao copiar!',
+      });
+    }
+  };
+
   const handleExport = () => {
     const dataToExport = filteredData.map(row => {
         const newRow = {};
@@ -88,9 +115,29 @@ const Conferencia = () => {
   };
 
   // Lógica de Resize
-  const mouseMove = (e) => { /* ... (mantida igual) ... */ };
-  const mouseUp = () => { /* ... (mantida igual) ... */ };
-  const mouseDown = (e, index) => { /* ... (mantida igual) ... */ };
+  const mouseMove = (e) => {
+    if (activeIndex.current === null) return;
+    const gridColumns = [...colunas];
+    const col = gridColumns[activeIndex.current];
+    if(e.movementX !== 0) {
+        col.width = Math.max(50, col.width + e.movementX);
+        setColunas(gridColumns);
+    }
+  };
+
+  const mouseUp = () => {
+    activeIndex.current = null;
+    document.removeEventListener('mousemove', mouseMove);
+    document.removeEventListener('mouseup', mouseUp);
+    document.body.style.cursor = 'default';
+  };
+
+  const mouseDown = (e, index) => {
+    activeIndex.current = index;
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', mouseUp);
+    document.body.style.cursor = 'col-resize';
+  };
 
   const totalErros = dados.filter(d => !d.gerente_tarefa || !d.cod_resultado || !d.gerente_tarefa.includes('-') || !d.cod_resultado.includes('-')).length;
 
@@ -167,7 +214,22 @@ const Conferencia = () => {
 
                     return (
                       <td key={col.key} className={className} title={d[col.key]}>
-                        {content}
+                        {col.key === 'projeto' ? ( // Condição para a coluna Projeto
+                          <div className="projeto-cell-content">
+                            <span>{content}</span>
+                            <FontAwesomeIcon 
+                              icon={faCopy} 
+                              className="copy-icon" 
+                              onClick={(e) => { 
+                                e.stopPropagation(); // Evita que clique na linha ative algo
+                                handleCopy(content); 
+                              }} 
+                              title="Copiar Projeto"
+                            />
+                          </div>
+                        ) : (
+                          content
+                        )}
                       </td>
                     );
                   })}
