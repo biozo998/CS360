@@ -1,96 +1,15 @@
-from sqlalchemy import create_engine, text
-import os
-from dotenv import load_dotenv
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
+from config import config
 
-load_dotenv()
+engine = create_engine(config.DATABASE_URL, echo=False)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Conecta ao banco usando a URL do .env
-engine = create_engine(os.getenv("DATABASE_URL"))
+Base = declarative_base()
 
-def inicializar_banco():
-    print("[Database] Verificando e criando tabelas...")
+def get_db():
+    db = SessionLocal()
     try:
-        with engine.begin() as conn:
-            # 1. Tabela de Projetos
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS lancamentos_projeto (
-                    id_tarefa INTEGER PRIMARY KEY,
-                    gerente VARCHAR(255),
-                    cliente VARCHAR(255),
-                    id_proj INTEGER,
-                    projeto VARCHAR(255),
-                    centro_resultado VARCHAR(255),
-                    tp_proj VARCHAR(50),
-                    tarefa TEXT,
-                    responsavel VARCHAR(255),
-                    dt_inicio DATE,
-                    dt_fim DATE,
-                    trab_prev DECIMAL(10,2),
-                    trab_apontado DECIMAL(10,2),
-                    sld_hrs DECIMAL(10,2),
-                    gerente_tarefa VARCHAR(50),
-                    cod_resultado VARCHAR(50),
-                    ativo BOOLEAN DEFAULT TRUE,
-                    ultima_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """))
-
-            # 2. Tabela de Cadastro de Gerentes
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS cad_gerentes (
-                    codigo VARCHAR(3) PRIMARY KEY,
-                    nome VARCHAR(255),
-                    area VARCHAR(100)
-                );
-            """))
-
-            # 3. Tabela de Cadastro de Atividades
-            conn.execute(text("""
-                CREATE TABLE IF NOT EXISTS cad_atividades (
-                    codigo VARCHAR(3) PRIMARY KEY,
-                    tipo_hora VARCHAR(20),
-                    descricao TEXT,
-                    estrategia VARCHAR(50)
-                );
-            """))
-        print("[Database] Todas as tabelas foram inicializadas com sucesso.")
-    except Exception as e:
-        print(f"[Database] Erro ao inicializar banco: {e}")
-        
-def upsert_dados(df):
-    """Executa a lógica de Inserir ou Atualizar (Upsert)."""
-    with engine.begin() as conn:
-        # Marca todos como inativos antes de processar o novo arquivo
-        conn.execute(text("UPDATE lancamentos_projeto SET ativo = FALSE"))
-
-        for _, row in df.iterrows():
-            query = text("""
-                INSERT INTO lancamentos_projeto (
-                    id_tarefa, gerente, cliente, id_proj, projeto, centro_resultado, 
-                    tp_proj, tarefa, responsavel, dt_inicio, dt_fim, 
-                    trab_prev, trab_apontado, sld_hrs, gerente_tarefa, cod_resultado, ativo
-                ) VALUES (
-                    :id_tarefa, :gerente, :cliente, :id_proj, :projeto, :centro_resultado, 
-                    :tp_proj, :tarefa, :responsavel, :dt_inicio, :dt_fim, 
-                    :trab_prev, :trab_apontado, :sld_hrs, :gerente_tarefa, :cod_resultado, TRUE
-                )
-                ON CONFLICT (id_tarefa) DO UPDATE SET
-                    gerente = EXCLUDED.gerente,
-                    cliente = EXCLUDED.cliente,
-                    projeto = EXCLUDED.projeto,
-                    centro_resultado = EXCLUDED.centro_resultado,
-                    tp_proj = EXCLUDED.tp_proj,
-                    tarefa = EXCLUDED.tarefa,
-                    responsavel = EXCLUDED.responsavel,
-                    dt_inicio = EXCLUDED.dt_inicio,
-                    dt_fim = EXCLUDED.dt_fim,
-                    trab_prev = EXCLUDED.trab_prev,
-                    trab_apontado = EXCLUDED.trab_apontado,
-                    sld_hrs = EXCLUDED.sld_hrs,
-                    gerente_tarefa = EXCLUDED.gerente_tarefa,
-                    cod_resultado = EXCLUDED.cod_resultado,
-                    ativo = TRUE,
-                    ultima_atualizacao = CURRENT_TIMESTAMP;
-            """)
-            conn.execute(query, row.to_dict())
-    print(f"[Database] Upsert de {len(df)} registros concluído.")
+        yield db
+    finally:
+        db.close()

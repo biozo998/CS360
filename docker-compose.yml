@@ -1,28 +1,18 @@
+version: '3.8'
+
 services:
   db:
-    image: postgres:15
-    container_name: cs360_db
-    restart: always
+    image: postgres:15-alpine
+    container_name: cs360_postgres
     environment:
-      POSTGRES_USER: user_cs360
-      POSTGRES_PASSWORD: password_cs360
-      POSTGRES_DB: cs360_database
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: cs360
     ports:
-      - "5433:5432" # Sua alteração está correta aqui
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: cs360_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5051:80"
-    depends_on:
-      - db
+    restart: unless-stopped
 
 volumes:
   postgres_data:

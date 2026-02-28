@@ -22,3 +22,10 @@ backend/relatorios_xlsx/
 
 # Sistema
 .DS_Store
+
+# Agentes
+.agent/
+
+.vscode/
+.cursorrules
+objetivos/
